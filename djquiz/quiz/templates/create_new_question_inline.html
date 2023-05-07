@@ -1,0 +1,19 @@
+{% extends "admin/edit_inline/tabular.html" %}
+{% load static %}
+{% load i18n %}
+
+
+{% block extrahead %}
+{{ block.super }}
+<script src="{% static 'admin/js/related-widget-wrapper.js' %}"></script>
+{% endblock %}
+
+{% block after_related_objects %}
+<tr class="add-row">
+    <td colspan="{{ inline_admin_formset.formset.empty_form|length }}">
+        <a href="{% url 'admin:quiz_quizquestion_add' %}" class="add-another" id="add_id_question">
+            {% trans 'Add Another Question' %}
+        </a>
+    </td>
+</tr>
+{% endblock %}

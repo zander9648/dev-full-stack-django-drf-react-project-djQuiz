@@ -1,0 +1,9 @@
+#Django
+venv/
+db.sqlite3
+.env
+.DS_Store
+htmlcov/
+.coverage
+__pycache__
+staticfiles/
