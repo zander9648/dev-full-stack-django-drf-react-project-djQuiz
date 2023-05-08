@@ -1,11 +1,7 @@
 from rest_framework import serializers
 
-from .models import MultipleChoiceQuestion, Quiz, QuizQuestion, QuizQuestionQuiz, TrueFalseQuestion
-
-FIELD_MAPPING = {
-    "mc": "mc_question",
-    "tf": "tf_question",
-}
+from .models import (MultipleChoiceQuestion, Quiz, QuizQuestion,
+                     QuizQuestionQuiz, TrueFalseQuestion)
 
 
 class MultipleChoiceQuestionSerializer(serializers.ModelSerializer):
@@ -17,7 +13,7 @@ class MultipleChoiceQuestionSerializer(serializers.ModelSerializer):
 class TrueFalseQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TrueFalseQuestion
-        fields = ("id", "true_answer", "false_answer")
+        fields = ("id", "answer")
 
 
 class QuizQuestionSerializer(serializers.ModelSerializer):
@@ -38,9 +34,15 @@ class QuizQuestionSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         question_fields = self.get_question_fields(instance)
         if question_fields is not None:
-            for i, field in enumerate(question_fields):
-                for key, value in field.items():
-                    representation[f"{key}_{i+1}"] = value
+            if isinstance(question_fields, list):
+                for field in question_fields:
+                    for key, value in field.items():
+                        if key != 'id':  # Skip the id field
+                            representation[key] = value
+            else:
+                for key, value in question_fields.items():
+                    if key != 'id':  # Skip the id field
+                        representation[key] = value
         return representation
 
 

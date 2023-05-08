@@ -49,8 +49,7 @@ class MultipleChoiceQuestion(models.Model):
 
 class TrueFalseQuestion(models.Model):
     question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name="tf_question")
-    true_answer = models.BooleanField()
-    false_answer = models.BooleanField()
+    answer = models.BooleanField()
 
     def __str__(self):
         return self.question.text
