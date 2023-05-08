@@ -41,7 +41,7 @@ class QuizQuestionQuiz(models.Model):
 
 class MultipleChoiceQuestion(models.Model):
     question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name="mc_question")
-    answers = models.JSONField()
+    answer = models.JSONField()
 
     def __str__(self):
         return self.question.text
@@ -49,7 +49,8 @@ class MultipleChoiceQuestion(models.Model):
 
 class TrueFalseQuestion(models.Model):
     question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name="tf_question")
-    answer = models.BooleanField()
+    true_answer = models.BooleanField(default=False)
+    false_answer = models.BooleanField(default=False)
 
     def __str__(self):
         return self.question.text

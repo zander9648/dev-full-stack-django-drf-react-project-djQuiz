@@ -49,10 +49,6 @@ interface Quiz {
 const QuizInterface = () => {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [hasErrors, setHasErrors] = useState<boolean>(false);
-  const [unansweredQuestions, setUnansweredQuestions] = useState<Question[]>(
-    []
-  );
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -62,9 +58,6 @@ const QuizInterface = () => {
           "http://localhost:8000/quizzes/1"
         );
         setQuiz(response.data);
-        setUnansweredQuestions(
-          response.data.questions.filter((question) => !question.selectedOption)
-        );
       } catch (error) {
         console.error(error);
       } finally {
@@ -73,12 +66,6 @@ const QuizInterface = () => {
     };
     fetchQuiz();
   }, []);
-
-  useEffect(() => {
-    setUnansweredQuestions(
-      quiz?.questions.filter((question) => !question.selectedOption) || []
-    );
-  }, [quiz]);
 
   const handleOptionSelect = (questionId: number, optionValue: string) => {
     if (!quiz) return;
@@ -91,7 +78,6 @@ const QuizInterface = () => {
             return {
               ...question,
               selectedOption: optionValue,
-              answered: true, // Add this line to indicate that the question has been answered
             };
           }
           return question;
@@ -118,20 +104,8 @@ const QuizInterface = () => {
     return null;
   };
 
-  const validateQuiz = () => {
-    let hasErrors = false;
-    quiz?.questions.forEach((question) => {
-      if (!question.selectedOption) {
-        hasErrors = true;
-      }
-    });
-    setHasErrors(hasErrors);
-    return !hasErrors;
-  };
-
   const calculateScore = () => {
     if (!quiz) return null;
-    if (!validateQuiz()) return;
     let correctCount = 0;
     quiz.questions.forEach((question) => {
       if (handleAnswerCheck(question)) correctCount++;
@@ -148,43 +122,30 @@ const QuizInterface = () => {
           <Typography variant="h4" gutterBottom>
             {quiz.name}
           </Typography>
-          <Typography variant="subtitle1" gutterBottom>
-            {quiz.description}
-          </Typography>
-          {unansweredQuestions.length > 0 && (
-            <Box mt={2} mb={1}>
-              <Typography variant="subtitle1" color="error">
-                Please answer the following questions:
-              </Typography>
-              <ul>
-                {unansweredQuestions.map((question) => (
-                  <li key={question.id}>{question.text}</li>
-                ))}
-              </ul>
-            </Box>
-          )}
+          <Typography variant="body1">{quiz.description}</Typography>
           <Grid container spacing={2}>
             {quiz.questions.map((question) => (
-              <Grid item xs={12} key={question.id}>
+              <Grid key={question.id} item xs={12}>
                 <Card>
                   <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {question.text}
-                    </Typography>
+                    <Typography variant="h6">{question.text}</Typography>
+                    {question.explanation && (
+                      <Typography variant="body2" color="text.secondary">
+                        {question.explanation}
+                      </Typography>
+                    )}
                     {question.question_type === "mc" && (
                       <FormControl component="fieldset">
                         <RadioGroup
-                          aria-label="quiz"
-                          name={`question-${question.id}`}
-                          value={question.selectedOption || ""}
-                          onChange={(event) =>
-                            handleOptionSelect(question.id, event.target.value)
+                          value={question.selectedOption ?? ""}
+                          onChange={(e) =>
+                            handleOptionSelect(question.id, e.target.value)
                           }
                         >
                           {question.answer?.options.map((option) => (
                             <FormControlLabel
                               key={option.id}
-                              value={`${option.id}`}
+                              value={option.id.toString()}
                               control={<Radio />}
                               label={option.text}
                             />
@@ -195,11 +156,9 @@ const QuizInterface = () => {
                     {question.question_type === "tf" && (
                       <FormControl component="fieldset">
                         <RadioGroup
-                          aria-label="quiz"
-                          name={`question-${question.id}`}
-                          value={question.selectedOption || ""}
-                          onChange={(event) =>
-                            handleOptionSelect(question.id, event.target.value)
+                          value={question.selectedOption ?? ""}
+                          onChange={(e) =>
+                            handleOptionSelect(question.id, e.target.value)
                           }
                         >
                           <FormControlLabel
@@ -215,30 +174,16 @@ const QuizInterface = () => {
                         </RadioGroup>
                       </FormControl>
                     )}
-                    {question.explanation && (
-                      <Typography variant="subtitle1" gutterBottom>
-                        Explanation: {question.explanation}
-                      </Typography>
-                    )}
                   </CardContent>
                 </Card>
               </Grid>
             ))}
           </Grid>
-          <Box mt={2} display="flex" justifyContent="center">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={calculateScore}
-            >
+          <Box mt={2}>
+            <Button variant="contained" onClick={() => calculateScore()}>
               Submit Quiz
             </Button>
           </Box>
-          {hasErrors && (
-            <Typography variant="subtitle1" color="error">
-              Please answer all questions before submitting.
-            </Typography>
-          )}
         </>
       )}
     </Box>
