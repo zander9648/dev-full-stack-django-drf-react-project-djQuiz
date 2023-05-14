@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Button } from "@mui/material";
 
 interface Option {
   id: number;
@@ -39,7 +38,7 @@ const QuizInterface = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasErrors, setHasErrors] = useState<boolean>(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
-  const [isQuizGraded, setIsQuizGraded] = useState<boolean>(false);
+  const radioGroupRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -71,10 +70,6 @@ const QuizInterface = () => {
       localStorage.setItem("quiz", JSON.stringify(quiz));
     }
   }, [quiz]);
-
-  const handleQuizGrade = () => {
-    setIsQuizGraded(true);
-  };
 
   const handleOptionSelect = (optionValue: string) => {
     if (!quiz) return;
@@ -135,14 +130,6 @@ const QuizInterface = () => {
     localStorage.removeItem("quiz");
   };
 
-  const calculatePercentage = () => {
-    if (!quiz) return null;
-    const answeredQuestions = quiz.questions.filter(
-      (question) => question.selectedOption !== undefined
-    );
-    return Math.round((answeredQuestions.length / quiz.questions.length) * 100);
-  };
-
   if (isLoading) {
     return <div>"Loading...</div>;
   }
@@ -163,18 +150,6 @@ const QuizInterface = () => {
     );
   }
 
-  if (isQuizGraded) {
-    const score = calculateScore();
-    const maxScore = quiz.questions.length;
-    return (
-      <div>
-        <h1>
-          Your score is: {score} out of {maxScore}
-        </h1>
-      </div>
-    );
-  }
-
   const currentQuestion = quiz.questions[currentQuestionIndex];
 
   return (
@@ -183,90 +158,37 @@ const QuizInterface = () => {
       <p>{quiz.description}</p>
       <hr />
       <h2>{currentQuestion.text}</h2>
-      <p>
-        {`Question ${currentQuestionIndex + 1} of ${quiz.questions.length} (${
-          calculatePercentage() || 0
-        }% answered)`}
-      </p>
       {currentQuestion.question_type === "mc" && (
         <div>
           {currentQuestion.answer?.options.map((option) => (
             <div key={option.id}>
-              <Button
-                sx={{
-                  "&.selected": {
-                    backgroundColor: "primary.main",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "primary.dark",
-                    },
-                  },
-                }}
-                className={`option-button ${
+              <input
+                type="radio"
+                id={option.id.toString()}
+                name="mc-answer"
+                value={option.id.toString()}
+                checked={
                   option.id.toString() === currentQuestion.selectedOption
-                    ? "selected"
-                    : ""
-                }`}
-                color="primary"
-                onClick={() => handleOptionSelect(option.id.toString())}
-              >
-                {option.text}
-              </Button>
+                }
+                onChange={(e) => handleOptionSelect(e.target.value)}
+              />
+              <label htmlFor={option.id.toString()}>{option.text}</label>
             </div>
           ))}
         </div>
       )}
-
       {currentQuestion.question_type === "tf" && (
         <div>
-          <Button
-            className={`option-button ${
-              currentQuestion.selectedOption === "true" ? "selected" : ""
-            }`}
-            sx={{
-              mr: 1,
-              bgcolor:
-                currentQuestion.selectedOption === "true"
-                  ? "primary.main"
-                  : "inherit",
-              color:
-                currentQuestion.selectedOption === "true" ? "#fff" : "inherit",
-              "&:hover": {
-                bgcolor:
-                  currentQuestion.selectedOption === "true"
-                    ? "primary.dark"
-                    : "action.hover",
-              },
-            }}
-            onClick={() => handleOptionSelect("true")}
+          <select
+            ref={radioGroupRef}
+            onChange={(e) => handleOptionSelect(e.target.value)}
+            value={currentQuestion.selectedOption}
           >
-            True
-          </Button>
-          <Button
-            className={`option-button ${
-              currentQuestion.selectedOption === "false" ? "selected" : ""
-            }`}
-            sx={{
-              bgcolor:
-                currentQuestion.selectedOption === "false"
-                  ? "primary.main"
-                  : "inherit",
-              color:
-                currentQuestion.selectedOption === "false" ? "#fff" : "inherit",
-              "&:hover": {
-                bgcolor:
-                  currentQuestion.selectedOption === "false"
-                    ? "primary.dark"
-                    : "action.hover",
-              },
-            }}
-            onClick={() => handleOptionSelect("false")}
-          >
-            False
-          </Button>
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
         </div>
       )}
-
       {currentQuestionIndex !== 0 && (
         <button onClick={handlePrevQuestion}>Previous</button>
       )}
@@ -280,11 +202,6 @@ const QuizInterface = () => {
             Your score: {calculateScore()} / {quiz.questions.length}
           </p>
         </div>
-      )}
-      {currentQuestionIndex === quiz.questions.length - 1 && (
-        <Button variant="contained" color="primary" onClick={handleQuizGrade}>
-          Grade
-        </Button>
       )}
     </div>
   );
