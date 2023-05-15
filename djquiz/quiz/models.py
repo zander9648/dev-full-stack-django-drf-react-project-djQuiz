@@ -12,6 +12,10 @@ class Quiz(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
+    # instant feedback
+    # can change answer
+    # timer
+
     def __str__(self):
         return self.name
 
