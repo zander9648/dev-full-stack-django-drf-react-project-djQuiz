@@ -62,7 +62,7 @@ const QuizInterface = () => {
   const [isQuizGraded, setIsQuizGraded] = useState<boolean>(false);
   const [previous, setPrevious] = useState<boolean>(false);
   const [useTime, setUseTime] = useState<boolean>(true);
-  const [timePerQuestion, setTimePerQuestion] = useState<number | null>(2);
+  const [timePerQuestion, setTimePerQuestion] = useState<number | null>(10);
 
   useEffect(() => {
     const fetchQuiz = async () => {
