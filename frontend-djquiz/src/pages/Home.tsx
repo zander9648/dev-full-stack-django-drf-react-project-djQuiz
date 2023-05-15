@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { Button } from "@mui/material";
 
@@ -34,6 +34,26 @@ interface Quiz {
   questions: Question[];
 }
 
+function useInterval(callback: Function, delay: number | null) {
+  const savedCallback = useRef<Function | null>(null);
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    function tick() {
+      if (savedCallback.current) {
+        savedCallback.current();
+      }
+    }
+    if (delay !== null) {
+      const id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
 const QuizInterface = () => {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -41,6 +61,8 @@ const QuizInterface = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [isQuizGraded, setIsQuizGraded] = useState<boolean>(false);
   const [previous, setPrevious] = useState<boolean>(false);
+  const [useTime, setUseTime] = useState<boolean>(true);
+  const [timePerQuestion, setTimePerQuestion] = useState<number | null>(2);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -123,10 +145,31 @@ const QuizInterface = () => {
   };
 
   const handleNextQuestion = () => {
-    if (currentQuestion.selectedOption) {
-      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+    if (!useTime) {
+      if (currentQuestion.selectedOption) {
+        if (currentQuestionIndex === quiz!.questions.length - 1) {
+          handleQuizGrade();
+        } else {
+          setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+        }
+      }
+    } else {
+      if (currentQuestionIndex === quiz!.questions.length - 1) {
+        handleQuizGrade();
+      } else {
+        setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      }
     }
   };
+
+  useInterval(
+    () => {
+      if (useTime) {
+        handleNextQuestion();
+      }
+    },
+    useTime && timePerQuestion ? timePerQuestion * 1000 : null
+  );
 
   const handlePrevQuestion = () => {
     setCurrentQuestionIndex((prevIndex) => prevIndex - 1);
@@ -173,6 +216,25 @@ const QuizInterface = () => {
   }
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
+  function useInterval(callback: Function, delay: number | null) {
+    const savedCallback = useRef<Function | null>(null);
+
+    useEffect(() => {
+      savedCallback.current = callback;
+    }, [callback]);
+
+    useEffect(() => {
+      function tick() {
+        if (savedCallback.current) {
+          savedCallback.current();
+        }
+      }
+      if (delay !== null) {
+        const id = setInterval(tick, delay);
+        return () => clearInterval(id);
+      }
+    }, [delay]);
+  }
 
   return (
     <div>
