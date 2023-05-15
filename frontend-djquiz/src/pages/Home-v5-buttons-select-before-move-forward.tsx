@@ -40,7 +40,6 @@ const QuizInterface = () => {
   const [hasErrors, setHasErrors] = useState<boolean>(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [isQuizGraded, setIsQuizGraded] = useState<boolean>(false);
-  const [previous, setPrevious] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -226,15 +225,19 @@ const QuizInterface = () => {
           </Button>
         </div>
       )}
-      {previous && currentQuestionIndex > 0 && (
-        <Button onClick={handlePrevQuestion}>Previous</Button>
-      )}
-      {currentQuestionIndex < quiz.questions.length - 1 && (
-        <Button onClick={handleNextQuestion}>Next</Button>
-      )}
-      {currentQuestionIndex === quiz.questions.length - 1 && (
-        <Button onClick={handleQuizGrade}>Finish</Button>
-      )}
+      <Button
+        disabled={currentQuestionIndex === 0}
+        onClick={handlePrevQuestion}
+      >
+        Previous
+      </Button>
+      <Button onClick={handleNextQuestion}>
+        {currentQuestionIndex === quiz.questions.length - 1 ? (
+          <Button onClick={handleQuizGrade}>Submit</Button>
+        ) : (
+          "Next"
+        )}
+      </Button>
     </div>
   );
 };
