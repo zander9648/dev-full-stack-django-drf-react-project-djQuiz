@@ -284,11 +284,17 @@ const QuizInterface = () => {
           {currentQuestion.answer?.options.map((option) => (
             <div key={option.id}>
               <Button
-                sx={{
+                style={{
                   backgroundColor:
                     currentQuestion.selectedOption === option.id.toString()
-                      ? "green"
+                      ? "#21b6ae"
                       : "white",
+                }}
+                sx={{
+                  color:
+                    currentQuestion.selectedOption === option.id.toString()
+                      ? "black"
+                      : "blue",
                 }}
                 onClick={() => handleOptionSelect(option.id.toString())}
               >
