@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import { Button } from "@mui/material";
-import LinearProgress from "@mui/material/LinearProgress";
+import { Button, LinearProgress } from "@mui/material";
 
 interface Option {
   id: number;
@@ -35,6 +34,26 @@ interface Quiz {
   questions: Question[];
 }
 
+function useInterval(callback: Function, delay: number | null) {
+  const savedCallback = useRef<Function | null>(null);
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    function tick() {
+      if (savedCallback.current) {
+        savedCallback.current();
+      }
+    }
+    if (delay !== null) {
+      const id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
 const QuizInterface = () => {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -45,7 +64,6 @@ const QuizInterface = () => {
   const [useTime, setUseTime] = useState<boolean>(true);
   const [timePerQuestion, setTimePerQuestion] = useState<number | null>(10);
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
-  const [isAnswerSelected, setIsAnswerSelected] = useState<boolean[]>([]);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -87,16 +105,14 @@ const QuizInterface = () => {
     setQuiz((prevState) => {
       if (!prevState) return null;
       const updatedQuestions = [...prevState.questions];
-      updatedQuestions[currentQuestionIndex].selectedOption = optionValue;
+      updatedQuestions[currentQuestionIndex] = {
+        ...updatedQuestions[currentQuestionIndex],
+        selectedOption: optionValue,
+      };
       return {
         ...prevState,
         questions: updatedQuestions,
       };
-    });
-    setIsAnswerSelected((prevSelected) => {
-      const updatedSelected = [...prevSelected];
-      updatedSelected[currentQuestionIndex] = true;
-      return updatedSelected;
     });
   };
 
@@ -179,11 +195,6 @@ const QuizInterface = () => {
 
   const handlePrevQuestion = () => {
     setCurrentQuestionIndex((prevIndex) => prevIndex - 1);
-    setIsAnswerSelected((prevSelected) => {
-      const updatedSelected = [...prevSelected];
-      updatedSelected[currentQuestionIndex - 1] = true;
-      return updatedSelected;
-    });
   };
 
   const calculatePercentage = () => {
@@ -323,14 +334,12 @@ const QuizInterface = () => {
       {previous && currentQuestionIndex > 0 && (
         <Button onClick={handlePrevQuestion}>Previous</Button>
       )}
-      {currentQuestionIndex < quiz.questions.length - 1 &&
-        isAnswerSelected[currentQuestionIndex] && (
-          <Button onClick={handleNextQuestion}>Next</Button>
-        )}
-      {currentQuestionIndex === quiz.questions.length - 1 &&
-        isAnswerSelected[currentQuestionIndex] && (
-          <Button onClick={handleQuizGrade}>Finish</Button>
-        )}
+      {currentQuestionIndex < quiz.questions.length - 1 && (
+        <Button onClick={handleNextQuestion}>Next</Button>
+      )}
+      {currentQuestionIndex === quiz.questions.length - 1 && (
+        <Button onClick={handleQuizGrade}>Finish</Button>
+      )}
     </div>
   );
 };
