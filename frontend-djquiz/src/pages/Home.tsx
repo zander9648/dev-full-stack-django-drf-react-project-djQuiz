@@ -42,7 +42,7 @@ const QuizInterface = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [isQuizGraded, setIsQuizGraded] = useState<boolean>(false);
   const [previous, setPrevious] = useState<boolean>(false);
-  const [useTime, setUseTime] = useState<boolean>(true);
+  const [useTime, setUseTime] = useState<boolean>(false);
   const [timePerQuestion, setTimePerQuestion] = useState<number | null>(10);
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const [isAnswerSelected, setIsAnswerSelected] = useState<boolean[]>([]);
@@ -254,7 +254,6 @@ const QuizInterface = () => {
       <hr />
 
       <div>
-        {/* ... (existing JSX code) */}
         {useTime && remainingTime !== null && (
           <LinearProgress
             variant="determinate"
