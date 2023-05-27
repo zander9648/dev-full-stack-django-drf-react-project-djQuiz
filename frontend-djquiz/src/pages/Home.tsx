@@ -42,10 +42,11 @@ const QuizInterface = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [isQuizGraded, setIsQuizGraded] = useState<boolean>(false);
   const [previous, setPrevious] = useState<boolean>(false);
-  const [useTime, setUseTime] = useState<boolean>(false);
+  const [useTime, setUseTime] = useState<boolean>(true);
   const [timePerQuestion, setTimePerQuestion] = useState<number | null>(10);
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const [isAnswerSelected, setIsAnswerSelected] = useState<boolean[]>([]);
+  const [showAnswer, setShowAnswer] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchQuiz = async () => {
