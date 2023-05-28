@@ -46,7 +46,7 @@ const QuizInterface = () => {
   const [timePerQuestion, setTimePerQuestion] = useState<number | null>(10);
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const [isAnswerSelected, setIsAnswerSelected] = useState<boolean[]>([]);
-  const [showAnswer, setShowAnswer] = useState<boolean>(true);
+  const [showAnswer, setShowAnswer] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -279,6 +279,7 @@ const QuizInterface = () => {
         }% answered)`}
       </p>
       <h2>{currentQuestion.text}</h2>
+
       {currentQuestion.question_type === "mc" && (
         <div>
           {currentQuestion.answer?.options.map((option) => (
@@ -299,33 +300,55 @@ const QuizInterface = () => {
                 onClick={() => handleOptionSelect(option.id.toString())}
               >
                 {option.text}
+                {showAnswer &&
+                  currentQuestion.selectedOption === option.id.toString() && (
+                    <span>{option.is_correct ? "✔️" : "❌"}</span>
+                  )}
               </Button>
             </div>
           ))}
         </div>
       )}
+
       {currentQuestion.question_type === "tf" && (
         <div>
           <Button
-            sx={{
+            style={{
               backgroundColor:
-                currentQuestion.selectedOption === "true" ? "green" : "white",
+                currentQuestion.selectedOption === "true" ? "#21b6ae" : "white",
+            }}
+            sx={{
+              color:
+                currentQuestion.selectedOption === "true" ? "black" : "blue",
             }}
             onClick={() => handleOptionSelect("true")}
           >
             True
+            {showAnswer && currentQuestion.selectedOption === "true" && (
+              <span>{currentQuestion.true_answer ? "✔️" : "❌"}</span>
+            )}
           </Button>
           <Button
-            sx={{
+            style={{
               backgroundColor:
-                currentQuestion.selectedOption === "false" ? "green" : "white",
+                currentQuestion.selectedOption === "false"
+                  ? "#21b6ae"
+                  : "white",
+            }}
+            sx={{
+              color:
+                currentQuestion.selectedOption === "false" ? "black" : "blue",
             }}
             onClick={() => handleOptionSelect("false")}
           >
             False
+            {showAnswer && currentQuestion.selectedOption === "false" && (
+              <span>{!currentQuestion.true_answer ? "✔️" : "❌"}</span>
+            )}
           </Button>
         </div>
       )}
+
       {previous && currentQuestionIndex > 0 && (
         <Button onClick={handlePrevQuestion}>Previous</Button>
       )}
